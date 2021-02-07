@@ -5,7 +5,6 @@
  *)
 
 open Order
-
 open Orderedcoll ;;
 
 (*======================================================================
@@ -69,11 +68,12 @@ by, say, generating an `IntString` priority queue and running the tests
 to make sure your implementation works.
 ......................................................................*)
 
-module ListQueue (C : COMPARABLE) : (PRIOQUEUE with type elt = C.t) =
+module ListQueue (Elt : COMPARABLE)
+       : (PRIOQUEUE with type elt = Elt.t) =
   struct
     exception QueueEmpty
 
-    type elt = C.t
+    type elt = Elt.t
 
     type queue = elt list
 
@@ -97,8 +97,8 @@ module ListQueue (C : COMPARABLE) : (PRIOQUEUE with type elt = C.t) =
       let rec to_string' q =
         match q with
         | [] -> ""
-        | [hd] -> (C.to_string hd)
-        | hd :: tl -> (C.to_string hd) ^ ";" ^ (to_string' tl)
+        | [hd] -> (Elt.to_string hd)
+        | hd :: tl -> (Elt.to_string hd) ^ ";" ^ (to_string' tl)
       in
       let qs = to_string' q in "[" ^ qs ^ "]"
   end
@@ -120,13 +120,13 @@ compiles cleanly.
 
 (* You'll want to uncomment this before working on this section! *)
 (*
-module TreeQueue (C : COMPARABLE) : (PRIOQUEUE with type elt = C.t) =
+module TreeQueue (Elt : COMPARABLE) : (PRIOQUEUE with type elt = Elt.t) =
   struct
     exception QueueEmpty
 
     (* You can use the module T to access the functions defined in BinSTree,
        e.g. T.insert *)
-    module T = (BinSTree(C) : (ORDERED_COLLECTION with type elt = C.t))
+    module T = (BinSTree(C) : (ORDERED_COLLECTION with type elt = Elt.t))
 
     (* Implement the remainder of the module. *)
 
@@ -139,8 +139,8 @@ Problem 4: Implementing BinaryHeap
 Implement a priority queue using a binary heap. See the problem set
 writeup for more info.
 
-You should implement a min-heap, i.e., the top of your heap stores the
-smallest element in the entire heap (which will end up being the
+You should implement a min-heap, that is, the top of your heap stores
+the smallest element in the entire heap (which will end up being the
 element with highest priority when the heap is iused as a priority
 queue).
 
@@ -168,12 +168,12 @@ so, you *must* fix the tree before returning it to the user.  Fill in
 the rest of the module below!
 ......................................................................*)
    
-module BinaryHeap (C : COMPARABLE) : (PRIOQUEUE with type elt = C.t) =
+module BinaryHeap (Elt : COMPARABLE) : (PRIOQUEUE with type elt = Elt.t) =
   struct
 
     exception QueueEmpty
 
-    type elt = C.t
+    type elt = Elt.t
 
     (* A node in the tree is either even or odd *)
     type balance = Even | Odd
@@ -202,15 +202,15 @@ module BinaryHeap (C : COMPARABLE) : (PRIOQUEUE with type elt = C.t) =
     let to_string (q: queue) =
       let rec to_string' (t: tree) =
         match t with
-        | Leaf e1 -> "Leaf " ^ C.to_string e1
+        | Leaf e1 -> "Leaf " ^ Elt.to_string e1
         | OneBranch(e1, e2) ->
-                 "OneBranch (" ^ C.to_string e1 ^ ", "
-                 ^ C.to_string e2 ^ ")"
+                 "OneBranch (" ^ Elt.to_string e1 ^ ", "
+                 ^ Elt.to_string e2 ^ ")"
         | TwoBranch(Odd, e1, t1, t2) ->
-                 "TwoBranch (Odd, " ^ C.to_string e1 ^ ", "
+                 "TwoBranch (Odd, " ^ Elt.to_string e1 ^ ", "
                  ^ to_string' t1 ^ ", " ^ to_string' t2 ^ ")"
         | TwoBranch(Even, e1, t1, t2) ->
-                 "TwoBranch (Even, " ^ C.to_string e1 ^ ", "
+                 "TwoBranch (Even, " ^ Elt.to_string e1 ^ ", "
                  ^ to_string' t1 ^ ", " ^ to_string' t2 ^ ")"
       in
       match q with
@@ -235,14 +235,14 @@ module BinaryHeap (C : COMPARABLE) : (PRIOQUEUE with type elt = C.t) =
         match t with
         (* If the tree is just a Leaf, then we end up with a OneBranch *)
         | Leaf e1 ->
-           (match C.compare e e1 with
+           (match Elt.compare e e1 with
             | Equal
             | Greater -> OneBranch (e1, e)
             | Less -> OneBranch (e, e1))
 
         (* If the tree was a OneBranch, it will now be a TwoBranch *)
         | OneBranch (e1, e2) ->
-           (match C.compare e e1 with
+           (match Elt.compare e e1 with
             | Equal
             | Greater -> TwoBranch (Even, e1, Leaf e2, Leaf e)
             | Less -> TwoBranch (Even, e, Leaf e2, Leaf e1))
@@ -250,7 +250,7 @@ module BinaryHeap (C : COMPARABLE) : (PRIOQUEUE with type elt = C.t) =
         (* If the tree was even, then it will become an odd tree (and
            the element is inserted to the left *)
         | TwoBranch (Even, e1, t1, t2) ->
-           (match C.compare e e1 with
+           (match Elt.compare e e1 with
             | Equal
             | Greater -> TwoBranch (Odd, e1, add_to_tree e t1, t2)
             | Less -> TwoBranch (Odd, e, add_to_tree e1 t1, t2))
@@ -258,7 +258,7 @@ module BinaryHeap (C : COMPARABLE) : (PRIOQUEUE with type elt = C.t) =
         (* If the tree was odd, then it will become an even tree (and
            the element is inserted to the right *)
         | TwoBranch (Odd, e1, t1, t2) ->
-           match C.compare e e1 with
+           match Elt.compare e e1 with
            | Equal
            | Greater -> TwoBranch (Even, e1, t1, add_to_tree e t2)
            | Less -> TwoBranch (Even, e, t1, add_to_tree e1 t2)
@@ -451,8 +451,8 @@ sorts. Record in a comment here the results of running each type of
 sort on lists of various sizes (you may find it useful to make a
 function to generate large lists).  Of course include your code for
 how you performed the measurements below.  Be convincing when
-establishing the algorithmic complexity of each sort.  See the CS51
-and Sys modules for functions related to keeping track of time
+establishing the algorithmic complexity of each sort.  See the Absbook
+and Sys modules for functions related to keeping track of time.
 ......................................................................*)
                          
 (*======================================================================

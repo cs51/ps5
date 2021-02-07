@@ -54,7 +54,10 @@ module IntCompare : (COMPARABLE with type t = int) =
 struct
   type t = int
 
-  let compare x y = if x < y then Less else if x > y then Greater else Equal
+  let compare x y =
+    if x < y then Less
+    else if x > y then Greater
+    else Equal
 
   let to_string = string_of_int
 
@@ -75,11 +78,12 @@ module IntStringCompare : (COMPARABLE with type t = int * string) =
 struct
   type t = int * string
                    
-  let compare (p1,_) (p2,_) =
-    if p1 < p2 then Less else if p1 > p2 then Greater else Equal
+  let compare (p1, _) (p2, _) =
+    if p1 < p2 then Less
+    else if p1 > p2 then Greater
+    else Equal
 
   let to_string (p, s) = "(" ^ string_of_int p ^ ", " ^ s ^ ")"
-
 
   let () = Random.self_init ()
 

@@ -24,8 +24,8 @@ sig
   val run_tests : unit -> unit
 end
 
-module BinSTree (C : COMPARABLE)
-              : (ORDERED_COLLECTION with type elt = C.t)
+module BinSTree (Elt : COMPARABLE)
+              : (ORDERED_COLLECTION with type elt = Elt.t)
 
 module IntTree : (ORDERED_COLLECTION with type elt = int)
 

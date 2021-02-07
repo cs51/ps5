@@ -3,7 +3,20 @@
                 Modules, Functors, and Priority Queues
              Ordered Collections and Binary Search Trees
  *)
+   
+(*======================================================================
+Before working on this problem set, read the problem set 5 writeup in
+the textbook. It provides context and crucial information for
+completing the problems. In addition, make sure that you are familiar
+with the problem set procedures in the document "Problem set
+procedures for CS51". 
 
+You are allowed (and encouraged) to work with a partner on this
+problem set. You are also allowed to work alone, if you prefer. See
+https://cs51.io/guides/procedures/pset-instructions/#working-with-a-partner
+for further information on working with partners on problem sets.  
+ *)
+   
 open Order
 
 (*======================================================================
@@ -58,9 +71,9 @@ end
 (*......................................................................
 Problem 1: Implementing ORDERED_COLLECTION with binary search trees
 
-BinSTree is a *functor*, which takes an argument C, a module that
+BinSTree is a *functor*, which takes an argument Elt, a module that
 implements the COMPARABLE signature (from the Order module). BinSTree
-ultimately must return a module which matches the ORDERED_COLLECTION
+ultimately must return a module that satisfies the ORDERED_COLLECTION
 signature.
 
 Now that we are passing in a COMPARABLE module, which separately
@@ -79,20 +92,20 @@ only be removed after five deletions of `3` (assuming no further
 intermediate insertions of `3`).
 ......................................................................*)
 
-module BinSTree (C : COMPARABLE)
-              : (ORDERED_COLLECTION with type elt = C.t) =
+module BinSTree (Elt : COMPARABLE)
+              : (ORDERED_COLLECTION with type elt = Elt.t) =
   struct
-    (* Inside of here, you can use C.t to refer to the type defined in
+    (* Inside of here, you can use Elt.t to refer to the type defined in
        the C module (which matches the COMPARABLE signature), and
-       C.compare to access the function that compares elements of
-       type C.t *)
+       Elt.compare to access the function that compares elements of
+       type Elt.t *)
     exception Empty
     exception NotFound
     
     (* Grab the type of the tree element from the module C that's
        passed in.  This is the only place you explicitly need to use
-       C.t; you should use elt everywhere else *)
-    type elt = C.t
+       Elt.t; you should use elt everywhere else *)
+    type elt = Elt.t
      
     (* The type for a collection, a binary search tree *)
     type tree =
@@ -107,12 +120,12 @@ module BinSTree (C : COMPARABLE)
     insert x t -- Inserts an element `x` into the tree `t`.  The left
     subtree of a given node should only have "smaller" elements than
     that node, while the right subtree should only have
-    "greater". Remember that "equal" elements should all be stored in
+    "larger". Remember that "equal" elements should all be stored in
     a list. *The most recently inserted elements should be at the
     front of the list so they can be preferentially found and
     deleted.* (This is important for later use in priority queues.)
     
-    Hint: Use `C.compare`. See `delete` for inspiration.
+    Hint: Use `Elt.compare`. See `delete` for inspiration.
     ..................................................................*)  
     let rec insert (x : elt) (t : tree) : tree =
       failwith "insert not implemented"
@@ -163,7 +176,7 @@ module BinSTree (C : COMPARABLE)
          match List.rev this with
          | [] -> failwith "delete: empty list as node"
          | hd :: tl ->
-            match C.compare x hd with
+            match Elt.compare x hd with
             | Less -> Branch (delete x left, this, right)
             | Greater -> Branch (left, this, delete x right)
             | Equal ->
@@ -207,12 +220,12 @@ module BinSTree (C : COMPARABLE)
       let list_to_string (lst: 'a list) =
         match lst with 
         | [] -> "[]"
-        | [hd] -> "[" ^ (C.to_string hd) ^ "]"
+        | [hd] -> "[" ^ (Elt.to_string hd) ^ "]"
         | hd :: tl -> "[" ^ List.fold_left
                               (fun a b -> a
                                           ^ "; "
-                                          ^ (C.to_string b))
-                              (C.to_string hd) tl ^ "]" in
+                                          ^ (Elt.to_string b))
+                              (Elt.to_string hd) tl ^ "]" in
       let rec to_string' (t: tree) = 
         match t with 
         | Leaf -> "Leaf"
@@ -223,15 +236,15 @@ module BinSTree (C : COMPARABLE)
 
     (* Functions for testing the implementation *)
     let test_insert () =
-      let x = C.generate () in
+      let x = Elt.generate () in
       let t = insert x empty in
       assert (t = Branch(Leaf, [x], Leaf));
       let t = insert x t in
       assert (t = Branch(Leaf, [x;x], Leaf));
-      let y = C.generate_gt x in
+      let y = Elt.generate_gt x in
       let t = insert y t in
       assert (t = Branch(Leaf, [x;x], Branch(Leaf, [y], Leaf)));
-      let z = C.generate_lt x in
+      let z = Elt.generate_lt x in
       let t = insert z t in
       assert (t = Branch(Branch(Leaf, [z], Leaf), [x; x],
                          Branch(Leaf, [y], Leaf)));
@@ -241,7 +254,7 @@ module BinSTree (C : COMPARABLE)
     (* Insert a bunch of elements, and test to make sure that we can
        search for all of them. *)
     let test_search () =
-      let x = C.generate () in
+      let x = Elt.generate () in
       let t = insert x empty in
       assert (search x t);
       let order = [ true; false; true; true; true; false; false] in
@@ -255,8 +268,8 @@ module BinSTree (C : COMPARABLE)
              | hd :: _ -> hd in
            let value =
              if current_order
-             then C.generate_gt prev_value
-             else C.generate_lt prev_value in
+             then Elt.generate_gt prev_value
+             else Elt.generate_lt prev_value in
            insert value tree_so_far, value :: values_so_far)
           order (t, []) in
       
@@ -270,24 +283,24 @@ module BinSTree (C : COMPARABLE)
        exhaustively that our code does the right thing on every single
        possible input.  *)
     let test_getmax () =
-      let x = C.generate () in
-      let x2 = C.generate_lt x in
-      let x3 = C.generate_lt x2 in
-      let x4 = C.generate_lt x3 in
+      let x = Elt.generate () in
+      let x2 = Elt.generate_lt x in
+      let x3 = Elt.generate_lt x2 in
+      let x4 = Elt.generate_lt x3 in
       assert (getmax (insert x4 (insert x3 (insert x2 (insert x empty)))) = x)
        
     let test_getmin () =
-      let x = C.generate () in
-      let x2 = C.generate_gt x in
-      let x3 = C.generate_gt x2 in
-      let x4 = C.generate_gt x3 in
+      let x = Elt.generate () in
+      let x2 = Elt.generate_gt x in
+      let x3 = Elt.generate_gt x2 in
+      let x4 = Elt.generate_gt x3 in
       assert (getmin (insert x2 (insert x4 (insert x (insert x3 empty)))) = x)
        
     let test_delete () =
-      let x = C.generate () in
-      let x2 = C.generate_lt x in
-      let x3 = C.generate_lt x2 in
-      let x4 = C.generate_lt x3 in
+      let x = Elt.generate () in
+      let x2 = Elt.generate_lt x in
+      let x3 = Elt.generate_lt x2 in
+      let x4 = Elt.generate_lt x3 in
       let after_ins = insert x4 (insert x3 (insert x2 (insert x empty))) in
       assert (delete x (delete x4 (delete x3 (delete x2 after_ins))) = empty)
        
@@ -331,11 +344,12 @@ let minutes_spent_on_pset () : int =
   failwith "time estimate not provided" ;;
 
 (*......................................................................
-It's worth reflecting on the work you did on this problem set, where
-you ran into problems and how you ended up resolving them. What might
-you have done in retrospect that would have allowed you to generate as
-good a submission in less time? Please provide us your thoughts in the
-string below.
+It's worth reflecting on the work you did on this problem set. Where
+did you run into problems and how did you end up resolving them? What
+might you have done in retrospect that would have allowed you to
+generate as good a submission in less time? Please provide us your
+thoughts on these questions and any other reflections in the string
+below.
 ......................................................................*)
 
 let reflection () : string =

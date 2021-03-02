@@ -4,10 +4,13 @@
                            Note on Testing
  *)
 
-(* Testing dilemma: I've implemented the `BinSTree` functor. How can I
-make sure that the invariant that `empty` is a Leaf is satisfied?  The
-following code, if uncommented, generates the error: "Error: Unbound
-constructor IntTree.Leaf"
+open Orderedcoll ;;
+
+(* Testing dilemma: I've implemented the `BinSTree` functor (in the
+`Orderedcoll` module opened above). How can I make sure that the
+invariant that `empty` is a Leaf is satisfied?  The following code, if
+uncommented, generates the error: "Error: Unbound constructor
+IntTree.Leaf"
 
 let _ =
   match IntTree.empty with

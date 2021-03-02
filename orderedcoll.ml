@@ -71,40 +71,40 @@ end
 (*......................................................................
 Problem 1: Implementing ORDERED_COLLECTION with binary search trees
 
-BinSTree is a *functor*, which takes an argument Elt, a module that
-implements the COMPARABLE signature (from the Order module). BinSTree
-ultimately must return a module that satisfies the ORDERED_COLLECTION
-signature.
+`BinSTree` is a *functor*, which takes an argument satisfying `Elt`, a
+module that implements the `COMPARABLE` signature (from the `Order`
+module). `BinSTree` ultimately must return a module that satisfies the
+`ORDERED_COLLECTION` signature.
 
-Now that we are passing in a COMPARABLE module, which separately
+Now that we are passing in a `COMPARABLE` module, which separately
 defines a type and comparison for that type, we can just implement
-something matching ORDERED_COLLECTION's signature in terms of that
+something matching `ORDERED_COLLECTION`'s signature in terms of that
 type and comparison function, and can wait until later to actually say
 what that type and comparison function are.
 
-Here, you'll complete the implementation of the BinSTree
+Here, you'll complete the implementation of the `BinSTree`
 functor. Unlike a binary search tree you may have seen before, this
 implementation keeps a list with each node in the tree that contains
-each instance of the value inserted into the tree. For example, if the
-integer `3` is inserted into an `int BinSTree` five times, then there
-will be a node with `[3; 3; 3; 3; 3]` in the tree, and the node will
-only be removed after five deletions of `3` (assuming no further
-intermediate insertions of `3`).
+inserted instances that are equal to each other (as per the comparison
+function). For example, if the integer `3` is inserted into an `int
+BinSTree` five times, then there will be a node with `[3; 3; 3; 3; 3]`
+in the tree, and the node will only be removed after five deletions of
+`3` (assuming no further intermediate insertions of `3`).
 ......................................................................*)
 
 module BinSTree (Elt : COMPARABLE)
               : (ORDERED_COLLECTION with type elt = Elt.t) =
   struct
-    (* Inside of here, you can use Elt.t to refer to the type defined in
-       the C module (which matches the COMPARABLE signature), and
-       Elt.compare to access the function that compares elements of
-       type Elt.t *)
+    (* Inside of here, you can use `Elt.t` to refer to the type
+       defined in the `Elt` module (which matches the `COMPARABLE`
+       signature), and `Elt.compare` to access the function that
+       compares elements of type `Elt.t` *)
     exception Empty
     exception NotFound
     
-    (* Grab the type of the tree element from the module C that's
+    (* Grab the type of the tree element from the module `Elt` that's
        passed in.  This is the only place you explicitly need to use
-       Elt.t; you should use elt everywhere else *)
+       `Elt.t`; you should use `elt` everywhere else *)
     type elt = Elt.t
      
     (* The type for a collection, a binary search tree *)
@@ -119,11 +119,12 @@ module BinSTree (Elt : COMPARABLE)
     (*..................................................................
     insert x t -- Inserts an element `x` into the tree `t`.  The left
     subtree of a given node should only have "smaller" elements than
-    that node, while the right subtree should only have
-    "larger". Remember that "equal" elements should all be stored in
-    a list. *The most recently inserted elements should be at the
-    front of the list so they can be preferentially found and
-    deleted.* (This is important for later use in priority queues.)
+    that node (as determined by the comparison function), while the
+    right subtree should only have "larger". Remember that "equal"
+    elements should all be stored in a list. *The most recently
+    inserted elements should be at the front of the list so they can
+    be preferentially found and deleted.* (This is important for later
+    use in priority queues.)
     
     Hint: Use `Elt.compare`. See `delete` for inspiration.
     ..................................................................*)  
@@ -141,11 +142,12 @@ module BinSTree (Elt : COMPARABLE)
 
     (* pull_min t -- A useful function for removing the node (list of
        elements) with the minimum value from a binary tree, returning
-       that node and the tree with that node removed.
+       that node and the tree with that node removed. Raises `Empty`
+       if the tree is empty (and hence has no minimum element).
     
        The `pull_min` function is not defined in the signature
-       ORDERED_COLLECTION.  When you're working on a structure that
-       implements a signature like ORDERED_COLLECTION, you may write
+       `ORDERED_COLLECTION`.  When you're working on a structure that
+       implements a signature like `ORDERED_COLLECTION`, you may write
        auxiliary functions for your implementation (such as
        `pull_min`) that are not defined in the signature.
     
@@ -199,7 +201,7 @@ module BinSTree (Elt : COMPARABLE)
     list. This is because we might pass in a module to this functor
     that defines a type and comparison function where each element in
     the list *is* distinct, but are `Equal` from the perspective of the
-    comparison function (like `IntStringCompare`).
+    comparison function (like `Order.IntStringCompare`).
     ..................................................................*)
     let getmin (t : tree) : elt =
       failwith "getmin not implemented"

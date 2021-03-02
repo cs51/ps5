@@ -13,11 +13,12 @@ Priority queues
 A signature for a priority queue. See the problem set specification
 for more information about priority queues.
 
-IMPORTANT: In your implementations of priority queues, the MINIMUM
-valued element corresponds to the HIGHEST priority. For example, in an
-integer priority queue, the integer 4 has lower priority than the
-integer 2. In case of multiple elements with identical priority, the
-priority queue returns them according to the normal queue discipline,
+IMPORTANT: In your implementations of priority queues, the *minimum*
+valued element corresponds to the *highest* priority (like in prizes:
+first place, second place, third place). For example, in an integer
+priority queue, the integer 4 has lower priority than the integer
+2. In case of multiple elements with identical priority, the priority
+queue returns them according to the normal queue discipline,
 first-in-first-out.
 ......................................................................*)
 
@@ -92,7 +93,7 @@ module ListQueue (Elt : COMPARABLE)
     let run_tests () =
       failwith "ListQueue run_tests not implemented"
 
-    (* IMPORTANT: Don't change the implementation of to_string. *)
+    (* IMPORTANT: Don't change the implementation of `to_string`. *)
     let to_string (q: queue) : string =
       let rec to_string' q =
         match q with
@@ -106,8 +107,8 @@ module ListQueue (Elt : COMPARABLE)
 (*......................................................................
 Problem 3: Implementing TreeQueue
 
-Now implement a functor TreeQueue that generates implementations of
-the priority queue signature PRIOQUEUE using a binary search tree.
+Now implement a functor `TreeQueue` that generates implementations of
+the priority queue signature `PRIOQUEUE` using a binary search tree.
 Luckily, you should be able to use *a lot* of your code from the work
 with `BinSTree`!
 
@@ -124,11 +125,13 @@ module TreeQueue (Elt : COMPARABLE) : (PRIOQUEUE with type elt = Elt.t) =
   struct
     exception QueueEmpty
 
-    (* You can use the module T to access the functions defined in BinSTree,
-       e.g. T.insert *)
-    module T = (BinSTree(C) : (ORDERED_COLLECTION with type elt = Elt.t))
+    (* We include in the `TreeQueue` module a module `T` for binary
+       search trees. You can use the module `T` to access the
+       functions defined in `BinSTree`, e.g., `T.insert` *)
 
-    (* Implement the remainder of the module. *)
+    module T = (BinSTree(Elt) : (ORDERED_COLLECTION with type elt = Elt.t))
+
+    (* Now you implement the remainder of the module. *)
 
   end
  *)
@@ -154,18 +157,18 @@ Be sure to read the problem set spec for hints and clarifications!
 Remember the invariants of the tree that make up your queue:
 
 1) A tree is ODD if its left subtree has 1 more node than its right
-subtree. It is EVEN if its left and right subtrees have the same
-number of nodes. The tree can never be in any other state. This is the
-WEAK invariant, and should never be false.
+   subtree. It is EVEN if its left and right subtrees have the same
+   number of nodes. The tree can never be in any other state. This is
+   the WEAK invariant, and should never be false.
 
 2) All nodes in the subtrees of a node should be *greater* than (or
-equal to) the value of that node.  This, combined with the previous
-invariant, makes a STRONG invariant.  Any tree that a user passes in
-to your module and receives back from it should satisfy this
-invariant.  However, in the process of, say, adding a node to the
-tree, the tree may intermittently not satisfy the order invariant. If
-so, you *must* fix the tree before returning it to the user.  Fill in
-the rest of the module below!
+   equal to) the value of that node. This, combined with the previous
+   invariant, makes a STRONG invariant. Any tree that a user passes in
+   to your module and receives back from it should satisfy this
+   invariant. However, in the process of, say, adding a node to the
+   tree, the tree may intermittently not satisfy the order
+   invariant. If so, you *must* fix the tree before returning it to
+   the user.  Fill in the rest of the module below!
 ......................................................................*)
    
 module BinaryHeap (Elt : COMPARABLE) : (PRIOQUEUE with type elt = Elt.t) =
@@ -349,22 +352,22 @@ module BinaryHeap (Elt : COMPARABLE) : (PRIOQUEUE with type elt = Elt.t) =
 Now to actually use the priority queue implementations for something
 useful!
 
-Priority queues are very closely related to sorts. Remember that
-removal of elements from priority queues removes elements in highest
-priority to lowest priority order. So, if your priority for an element
-is directly related to the value of the element, then you should be
-able to come up with a simple way to use a priority queue for
-sorting...
+Priority queues are very closely related to sorting functions.
+Remember that removal of elements from priority queues removes
+elements in highest priority to lowest priority order. So, if your
+priority for an element is directly related to the value of the
+element, then you should be able to come up with a simple way to use a
+priority queue for sorting....
 
-In OCaml 3.12 and above, modules can be turned into first-class
+In current versions of OCaml, modules can be turned into first-class
 values, and so can be passed to functions! Here, we're using that to
-avoid having to create a functor for sort. Creating the appropriate
-functor is a challenge problem :-)
+avoid having to create a functor for sort. (Creating the appropriate
+functor is a challenge problem. :-)
 
 The following code is simply using the functors and passing in a
-COMPARABLE module for integers, resulting in priority queues tailored
-for ints.
-......................................................................  *)
+`COMPARABLE` module for integers, resulting in priority queues
+tailored for ints.
+......................................................................*)
 
 module IntListQueue = (ListQueue(IntCompare) :
                          PRIOQUEUE with type elt = IntCompare.t)
@@ -396,7 +399,7 @@ let sort (m : (module PRIOQUEUE with type elt=IntCompare.t)) (lst : int list) =
     if P.is_empty pq then lst
     else
       let (x, pq') = P.take pq in
-      extractor pq' (x::lst) in
+      extractor pq' (x :: lst) in
   let pq = List.fold_right P.add lst P.empty in
   List.rev (extractor pq [])
 
@@ -459,5 +462,5 @@ and Sys modules for functions related to keeping track of time.
 Reflection on the problem set
 
      Please fill out the information about time spent and your
-     reflection thereon in the file orderedcoll.ml.
+     reflection thereon in the file `orderedcoll.ml`.
  *)
